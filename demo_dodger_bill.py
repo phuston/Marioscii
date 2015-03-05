@@ -35,7 +35,7 @@ def main():
     gameOver = False
 
     jumpcounter = 0
-    jumpinglist = [None,1,1,1,1,0,0,-1,-1,-1,-1]
+    jumpinglist = [0,1,1,1,1,0,0,-1,-1,-1,-1]
 
     goingleft = False
     goingright = False
@@ -64,7 +64,7 @@ def main():
             #     mousex, mousey = event.pos
             #     cellx, celly = win.getcoordinatesatpixel(mousex, mousey)
             if event.type == KEYDOWN:
-                if event.key == K_UP:   # execute jumping protocol
+                if event.key == K_UP and jumpcounter == 0:   # execute jumping protocol
                     # celly += -1
                     jumpcounter = 1
                 # elif event.key == K_DOWN:
@@ -120,9 +120,10 @@ def main():
         #     win.fill('#', GREEN, BLACK, (baddie['x'], baddie['y'], baddie['size'], baddie['size']))
 
         # win.fill('#', GREEN, 20, 30)
-        win.fill('#', fgcolor='green', region=[20,30,7,1])  #region=[x,y,width,height]
+        win.fill('#', fgcolor='green', region=[20,28,7,3])  #region=[x,y,width,height]
         win.fill('#', fgcolor='green', region=[0,31,80,1])
-        print str(win.getcharatpixel(22,30))
+        # win.fill('#', fgcolor='green', region=[0,0,80,50])
+        # print win.getcharatpixel(22,30)
 
         if not gameOver:
             playercolor = WHITE
@@ -138,6 +139,11 @@ def main():
         if jumpcounter > 0: # if we're currently jumping
             # print jumpcounter
             # win.putchar('@', cellx, (celly - jumpinglist[jumpcounter]), playercolor)
+
+            if jumpcounter >= 4 and win.getcharatpixel(cellx, (celly + 1)) == '#':
+                # check if platform is right below us
+                jumpcounter = 0
+
             celly -= jumpinglist[jumpcounter]
             jumpcounter += 1
             jumpcounter = jumpcounter % len(jumpinglist)

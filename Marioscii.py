@@ -10,6 +10,7 @@ from AudioSampler import AudioSampler
 from Motion_Tracker import Motion_Tracker
 import numpy as np
 import time
+import pygcurse
 
 # Screen dimensions
 SCREEN_WIDTH  = 800
@@ -35,6 +36,10 @@ level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
+win = pygcurse.PygcurseWindow(WINWIDTH, WINHEIGHT, fullscreen=False)
+pygame.display.set_caption('Pygcurse Dodger')
+win.autoupdate = False
+
 class MariosciiModel():
     """ Represents game state of Marioscii game """
     def __init__(self, width, height):
@@ -42,7 +47,7 @@ class MariosciiModel():
         self.height = height
         self.mario = Mario(15,20)
         self.level = Level(level1)
-        self.audio_sample = AudioSampler(10000)
+        self.audio_sample = AudioSampler(3000)
         self.motion_track = Motion_Tracker()
 
     def update(self, delta_t):
@@ -72,7 +77,7 @@ class Marioscii():
     def __init__(self):
         self.model = MariosciiModel(800, 600)
         self.view = MariosciiView(self.model, 800, 600)
-        self.controller = PygameKeyboardController(self.model)
+        self.controller = PygameController(self.model)
 
     def run(self):
         last_update = time.time()
