@@ -8,6 +8,7 @@ import pygame
 import random
 from AudioSampler import AudioSampler
 import numpy as np
+import time
 
 # Screen dimensions
 SCREEN_WIDTH  = 800
@@ -39,10 +40,47 @@ class MariosciiModel():
         self.width = width
         self.height = height
         self.mario = Mario(15,20)
+        self.level = Level(level1)
+        self.audio_sample = AudioSampler(10000)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
         self.mario.update(delta_t)
+
+class MariosciiView():
+    def __init__(self, model, width, height):
+        """ Initialize view for Marioscii """
+        pygame.init()
+        # to retrieve width and height use screen.get_size()
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # this is used for figuring out where to draw stuff
+        self.model = model
+
+    def draw(self):
+        """ Redraw the full game window """
+        self.screen.fill((0,51,102))
+        self.model.mario.draw(self.screen)
+        self.model.level.draw(self.screen)
+        pygame.display.update()
+
+
+class Marioscii():
+    """ The main Marioscii class """
+
+    def __init__(self):
+        self.model = MariosciiModel(800, 600)
+        self.view = MariosciiView(self.model, 800, 600)
+        self.controller = PygameKeyboardController(self.model)
+
+    def run(self):
+        last_update = time.time()
+        while True:
+            self.view.draw()
+            self.controller.process_events()
+            delta_t = time.time() - last_update
+            self.model.update(delta_t)
+            last_update = time.time()
+
 
 class Mario(pygame.sprite.Sprite):
     def __init__(self,pos_x,pos_y):
@@ -99,38 +137,6 @@ class Tile(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos):
         pygame.sprite.Sprite.__init__(self)
 
-class MariosciiView():
-    def __init__(self, model, width, height):
-        """ Initialize view for Marioscii """
-        pygame.init()
-        # to retrieve width and height use screen.get_size()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        # this is used for figuring out where to draw stuff
-        self.model = model
-
-    def draw(self):
-        """ Redraw the full game window """
-        self.screen.fill((0,51,102))
-        self.model.mario.draw(self.screen)
-        pygame.display.update()
-
-
-class Marioscii():
-    """ The main Marioscii class """
-
-    def __init__(self):
-        self.model = MariosciiModel(800, 600)
-        self.view = MariosciiView(self.model, 800, 600)
-        self.controller = PygameKeyboardController(self.model)
-
-    def run(self):
-        last_update = time.time()
-        while True:
-            self.view.draw()
-            self.controller.process_events()
-            delta_t = time.time() - last_update
-            self.model.update(delta_t)
-            last_update = time.time()
 
 
 class PygameKeyboardController():
@@ -145,86 +151,90 @@ class PygameKeyboardController():
                 done = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    mario.go_left()
+                    self.model.mario.go_left()
                 if event.key == pygame.K_RIGHT:
-                    mario.go_right()
+                    self.model.mario.go_right()
                     
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and mario.vel_x < 0:
-                    mario.stop()
+                    self.model.mario.stop()
                 if event.key == pygame.K_RIGHT and mario.vel_x > 0:
-                    mario.stop()
+                    self.model.mario.stop()
 
 
-    # Audio event processing
-    if audio_sample.is_above_trigger():
-        mario.go_right()
-    else:
-        mario.go_left()
+        # Audio event processing
+        if self.model.audio_sample.is_above_trigger():
+            self.model.mario.go_right()
+        else:
+            self.model.mario.go_left()
 
 pygame.init()
 
-
-audio_sample = AudioSampler(4000)
-
-# Create pygame window
-#infoObject = pygame.display.Info()
-#screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Marioscii")
-
-# Set clock and stuff
-done = False
-clock = pygame.time.Clock()
-
-# Initialize sprite
-mario = Mario(15, 20)
-level1 = Level(level1)
-# sprite_group = pygame.sprite.Group(mario)
-
-lastGetTicks = 0.0
-
-# Actually run the game
-while not done:
-
-    print audio_sample.is_above_trigger()
-    t = pygame.time.get_ticks()
-    # delta time in seconds.
-    dt = (t - lastGetTicks) / 1000.0
-    lastGetTicks = t
-
-    # Event processing
-    pygame.event.pump
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                mario.go_left()
-            if event.key == pygame.K_RIGHT:
-                mario.go_right()
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT and mario.vel_x < 0:
-                mario.stop()
-            if event.key == pygame.K_RIGHT and mario.vel_x > 0:
-                mario.stop()
+if __name__ == '__main__':
+    marioscii = Marioscii()
+    marioscii.run()
 
 
-    # Audio event processing
-    if audio_sample.is_above_trigger():
-        mario.go_right()
-    else:
-        mario.go_left()
+# audio_sample = AudioSampler(4000)
 
-    mario.update(dt)
+# # Create pygame window
+# #infoObject = pygame.display.Info()
+# #screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h))
+# screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+# pygame.display.set_caption("Marioscii")
 
-    # Drawing
-    screen.fill(WHITE)
-    mario.draw(screen)
-    level1.draw(screen)
+# # Set clock and stuff
+# done = False
+# clock = pygame.time.Clock()
+
+# # Initialize sprite
+# mario = Mario(15, 20)
+# level1 = Level(level1)
+# # sprite_group = pygame.sprite.Group(mario)
+
+# lastGetTicks = 0.0
+
+# # Actually run the game
+# while not done:
+
+#     print audio_sample.is_above_trigger()
+#     t = pygame.time.get_ticks()
+#     # delta time in seconds.
+#     dt = (t - lastGetTicks) / 1000.0
+#     lastGetTicks = t
+
+#     # Event processing
+#     pygame.event.pump
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             done = True
+#         if event.type == pygame.KEYDOWN:
+#             if event.key == pygame.K_LEFT:
+#                 mario.go_left()
+#             if event.key == pygame.K_RIGHT:
+#                 mario.go_right()
+#         if event.type == pygame.KEYUP:
+#             if event.key == pygame.K_LEFT and mario.vel_x < 0:
+#                 mario.stop()
+#             if event.key == pygame.K_RIGHT and mario.vel_x > 0:
+#                 mario.stop()
 
 
-    pygame.display.flip()
-    clock.tick(60)
+#     # Audio event processing
+#     if audio_sample.is_above_trigger():
+#         mario.go_right()
+#     else:
+#         mario.go_left()
 
-pygame.quit()
+#     mario.update(dt)
+
+#     # Drawing
+#     screen.fill(WHITE)
+#     mario.draw(screen)
+#     level1.draw(screen)
+
+
+#     pygame.display.flip()
+#     clock.tick(60)
+
+# pygame.quit()
