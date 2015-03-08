@@ -7,12 +7,13 @@ class Motion_Tracker():
 	web camera. """
 
 	def __init__(self):
-		self.cam = cv2.VideoCapture(0)
+		self.cam = cv2.VideoCapture(1)
 
 		#BGR color boundaries for filtering out all colors except white
 		self.boundaries = ([50, 30, 30], [145, 133, 128])
 
 		ret, self.frame = self.cam.read() 
+		self.frame = cv2.pyrDown(self.frame)
 		self.init = False
 
 	def avg_mov(self, mask):
@@ -20,14 +21,14 @@ class Motion_Tracker():
 		outputs the x and y positions of average movement """
 		# Threshold for pixels being black or white
 		threshold = 250
-		total_x = []
-		total_y = []
+		total_x = 0
+		count_x = 0
 		for y in xrange( mask.shape[0] ):
 			for x in xrange( mask.shape[1] ):
 				if mask.item(y,x) > threshold:
-					total_x.append(x)
-					total_y.append(y)
-		return (sum(total_x)/(len(total_x)+0.1), sum(total_x)/((len(total_x))+0.1))
+					total_x += x
+					count_x += 1
+		return float(total_x)/(count_x+0.1)
 
 	def get_movement(self):
 		""" Takes two frames from incoming video feed, 
@@ -37,11 +38,13 @@ class Motion_Tracker():
 		of movement. """
 
 		ret, self.frame = self.cam.read()
+		self.frame = cv2.pyrDown(self.frame)
 
 		# Checks if first run-through, creates last_frame
 		if self.init == False:
 			self.last_frame = self.frame
 			ret, self.frame = self.cam.read()
+			self.frame = cv2.pyrDown(self.frame)
 			self.init = True
 
 		frame_diff = self.frame - self.last_frame
@@ -55,13 +58,15 @@ class Motion_Tracker():
 
 		# Shrink mask size to increase computational speed
 		mask = cv2.pyrDown(mask)
+		# mask = cv2.pyrDown(mask)
+		# mask = cv2.pyrDown(mask)
 
-		avg_x, avg_y = self.avg_mov(mask)
+		avg_x = self.avg_mov(mask)
 
-		# Last frame = current frame
+		# Last frame becomes current frame
 		self.last_frame = self.frame
 
-		return avg_x, avg_y
+		return avg_x
 
 
 if __name__ == '__main__':
