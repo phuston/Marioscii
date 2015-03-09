@@ -25,15 +25,15 @@ RED      = ( 255,   0,   0)
 GREEN    = (   0, 255,   0)
 
 level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
+                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
+                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+                   (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0),
+                   (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
+                   (0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+                   (0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+                   (0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+                   (0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
                    (0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2),
                    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
@@ -50,7 +50,7 @@ class MariosciiModel():
         self.level = Level(level1)
         self.mario = Mario(20,20,self.level.tiles)
         # self.motion_track = Motion_Tracker()
-        self.audio_sample = AudioSampler(10000)
+        self.audio_sample = AudioSampler(2000)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
@@ -114,6 +114,7 @@ class Mario(pygame.sprite.Sprite):
 
         self.tiles = tiles
         self.onGround = False
+        self.jumpRatio = 10000
 
         self.image = pygame.Surface([20,20])
         self.image.fill(RED)
@@ -158,9 +159,9 @@ class Mario(pygame.sprite.Sprite):
     def go_right(self): 
         self.x_vel = 150
 
-    def jump(self):
+    def jump(self, intensity):
         if self.onGround:
-            self.y_vel = -300
+            self.y_vel = -300*(intensity/self.jumpRatio)
 
     def stop(self):
         self.x_vel = 0
@@ -231,35 +232,13 @@ class PygameController():
                     self.model.mario.stop()
 
 
-        # self.model.mario.collide()
-
-        # tile_hit_list = pygame.sprite.spritecollide(self.model.mario, self.model.level.tiles, False)
-        # # print "Tile hit list", tile_hit_list
-        # for tile in tile_hit_list:
-        #     # If we are moving right,
-        #     # set our right side to the left side of the item we hit
-        #     if self.model.mario.x_vel > 0:
-        #         self.model.mario.rect.right = tile.rect.left
-        #     elif self.model.mario.x_vel < 0:
-        #         # Otherwise if we are moving left, do the opposite.
-        #         self.model.mario.rect.left = tile.rect.right
-
-        # # Check and see if we hit anything
-        # tile_hit_list = pygame.sprite.spritecollide(self.model.mario, self.model.level.tiles, False)
-        # for tile in tile_hit_list:
-        #     if self.model.mario.y_vel > 0:
-        #         self.model.mario.rect.bottom = tile.rect.top
-        #     elif self.model.mario.y_vel < 0:
-        #         self.model.mario.rect.top = tile.rect.bottom
-        #     # Stop our vertical movement
-        #     self.model.mario.y_vel = 0
-
         # Audio event processing
-        if self.model.audio_sample.get_level():
-            self.model.mario.jump()
+        audio_trigger = self.model.audio_sample.get_level()
+        if audio_trigger:
+            self.model.mario.jump(audio_trigger)
 
-        # # # Motion event processing
-        # # x_mov = self.model.motion_track.get_movement() 
+        # # Motion event processing
+        # x_mov = self.model.motion_track.get_movement() 
 
 pygame.init()
 
