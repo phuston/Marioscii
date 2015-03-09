@@ -41,10 +41,6 @@ level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
                    (0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2),
                    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
-# win = pygcurse.PygcurseWindow(WINWIDTH, WINHEIGHT, fullscreen=False)
-# pygame.display.set_caption('Pygcurse Dodger')
-# win.autoupdate = False
-
 class MariosciiModel():
     """ Represents game state of Marioscii game """
     def __init__(self, width, height):
