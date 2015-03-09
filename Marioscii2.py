@@ -54,7 +54,7 @@ class MariosciiModel():
         self.level = Level(level1)
         self.mario = Mario(20,20,self.level.tiles)
         self.motion_track = Motion_Tracker()
-        self.audio_sample = AudioSampler(2000)
+        self.audio_sample = AudioSampler(15000)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
@@ -121,13 +121,11 @@ class Mario(pygame.sprite.Sprite):
         self.onGround = False
         self.jumpRatio = 10000
 
-        self.image = pygame.Surface([20,20])
-        self.image.fill(RED)
+        self.image = pygame.image.load('img/mario.png')
         self.rect = self.image.get_rect()
-        self.rect.topleft = [10, 10]
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image.convert_alpha(), self.rect)
 
     def update(self, dt):
         """ update mario due to passage of time """
@@ -198,14 +196,15 @@ class Tile(pygame.sprite.Sprite):
         self.x_pos = x_pos
         self.y_pos = y_pos
 
-        self.image = pygame.Surface([50,50])
-        self.image.fill(BLACK)
+        self.image = pygame.image.load('img/groundTile.png')
+        # self.image = pygame.Surface([50,50])
+        # self.image.fill(BLACK)
         self.rect = self.image.get_rect()
 
         self.rect = self.rect.move(self.x_pos, self.y_pos)
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image.convert_alpha(), self.rect)
 
 class ExitTile(Tile):
     def __init__(self, x_pos, y_pos):
