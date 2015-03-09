@@ -7,7 +7,7 @@ class Motion_Tracker():
 	web camera. """
 
 	def __init__(self):
-		self.cam = cv2.VideoCapture(1)
+		self.cam = cv2.VideoCapture(0)
 
 		#BGR color boundaries for filtering out all colors except white
 		self.boundaries = ([50, 30, 30], [145, 133, 128])
@@ -58,13 +58,14 @@ class Motion_Tracker():
 
 		# Shrink mask size to increase computational speed
 		mask = cv2.pyrDown(mask)
-		# mask = cv2.pyrDown(mask)
-		# mask = cv2.pyrDown(mask)
 
 		avg_x = self.avg_mov(mask)
 
 		# Last frame becomes current frame
 		self.last_frame = self.frame
+
+		if avg_x == 0.0:
+			return None
 
 		return avg_x
 

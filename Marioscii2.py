@@ -7,7 +7,7 @@ Created on Sun Mar 2 11:37 2015
 import pygame
 import random
 from AudioSampler import AudioSampler
-# from Motion_Tracker import Motion_Tracker
+from Motion_Tracker import Motion_Tracker
 import numpy as np
 import time
 import pygcurse
@@ -24,7 +24,11 @@ BLUE     = (   0,   0, 255)
 RED      = ( 255,   0,   0)
 GREEN    = (   0, 255,   0)
 
-level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+# Events
+NEXTLEVEL = pygame.USEREVENT + 1
+QUIT = pygame.USEREVENT + 2
+
+level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
@@ -32,9 +36,9 @@ level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
                    (0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
                    (0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-                   (0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2),
+                   (0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+                   (0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+                   (0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2),
                    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
 # win = pygcurse.PygcurseWindow(WINWIDTH, WINHEIGHT, fullscreen=False)
@@ -49,7 +53,7 @@ class MariosciiModel():
         self.tiles = pygame.sprite.Group()
         self.level = Level(level1)
         self.mario = Mario(20,20,self.level.tiles)
-        # self.motion_track = Motion_Tracker()
+        self.motion_track = Motion_Tracker()
         self.audio_sample = AudioSampler(2000)
 
     def update(self, delta_t):
@@ -84,14 +88,15 @@ class Marioscii():
 
     def run(self):
         last_ticks = 0.0
+        done = False
 
-        while True:
+        while not done:
             t = pygame.time.get_ticks()
             # delta time in seconds.
             dt = (t - last_ticks) / 1000.0
             last_ticks = t
 
-            self.controller.process_events()
+            done = self.controller.process_events()
             self.model.update(dt)
             self.view.draw()
 
@@ -134,6 +139,8 @@ class Mario(pygame.sprite.Sprite):
         self.rect.x += self.x_vel*dt
         self.collide(self.x_vel, 0)
 
+        self.x_vel = 0
+
         # y-axis updates and collisions
         self.rect.y += self.y_vel*dt
         self.onGround = False
@@ -143,8 +150,7 @@ class Mario(pygame.sprite.Sprite):
         for tile in self.tiles:
             if pygame.sprite.collide_rect(self, tile):
                 if isinstance(tile, ExitTile):
-                    pass
-                    ##TODO## Add what happens when 'exit' is reached
+                    pygame.event.post(pygame.event.Event(NEXTLEVEL))
                 if x_vel > 0: self.rect.right = tile.rect.left
                 if x_vel < 0: self.rect.left = tile.rect.right
                 if y_vel > 0:
@@ -159,9 +165,9 @@ class Mario(pygame.sprite.Sprite):
     def go_right(self): 
         self.x_vel = 150
 
-    def jump(self, intensity):
+    def jump(self):
         if self.onGround:
-            self.y_vel = -300*(intensity/self.jumpRatio)
+            self.y_vel = -300
 
     def stop(self):
         self.x_vel = 0
@@ -211,10 +217,11 @@ class PygameController():
         self.model = model
 
     def process_events(self):
+        done = False
         pygame.event.pump
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                done = True
+                pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     self.model.mario.go_left()
@@ -233,14 +240,22 @@ class PygameController():
 
 
         # Audio event processing
-        audio_trigger = self.model.audio_sample.get_level()
-        if audio_trigger:
-            self.model.mario.jump(audio_trigger)
+        if self.model.audio_sample.is_above_trigger():
+            self.model.mario.jump()
 
-        # # Motion event processing
-        # x_mov = self.model.motion_track.get_movement() 
+        # audio_trigger = self.model.audio_sample.get_level()
+        # if audio_trigger:
+        #     self.model.mario.jump(audio_trigger)
 
-pygame.init()
+        # Motion event processing
+        x_mov = self.model.motion_track.get_movement() 
+        if x_mov:
+            if x_mov < 70:
+                self.model.mario.go_right()
+            if x_mov >= 70:
+                self.model.mario.go_left()
+
+        return done
 
 if __name__ == '__main__':
     marioscii = Marioscii()
