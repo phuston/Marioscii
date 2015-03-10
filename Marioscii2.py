@@ -7,7 +7,7 @@ Created on Sun Mar 2 11:37 2015
 import pygame
 import random
 from AudioSampler import AudioSampler
-# from Motion_Tracker import Motion_Tracker
+from Motion_Tracker import Motion_Tracker
 import numpy as np
 import time
 import pygcurse
@@ -24,37 +24,63 @@ BLUE     = (   0,   0, 255)
 RED      = ( 255,   0,   0)
 GREEN    = (   0, 255,   0)
 
-level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2),
-                   (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
+# Events
+NEXTLEVEL = pygame.USEREVENT + 1
+next_level_event = pygame.event.Event(NEXTLEVEL, message="Next Level!")
+QUIT = pygame.USEREVENT + 2
+quit_event = pygame.event.Event(QUIT, message="Quit.")
 
-# win = pygcurse.PygcurseWindow(WINWIDTH, WINHEIGHT, fullscreen=False)
-# pygame.display.set_caption('Pygcurse Dodger')
-# win.autoupdate = False
+level1 = np.array(
+   [(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
+    (0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+    (0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+    (0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2),
+    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
+
+level2 = np.array(
+   [(2, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+    (1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
+    (1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1),
+    (1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1),
+    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
+
+all_levels = [level1, level2]
 
 class MariosciiModel():
     """ Represents game state of Marioscii game """
     def __init__(self, width, height):
+        self.levels = all_levels
+        self.current_level = 0
         self.width = width
         self.height = height
         self.tiles = pygame.sprite.Group()
-        self.level = Level(level1)
-        self.mario = Mario(20,20,self.level.tiles)
-        # self.motion_track = Motion_Tracker()
-        self.audio_sample = AudioSampler(10000)
+        self.level = Level(self.levels[self.current_level])
+        self.mario = Mario(0,0,self.level.tiles)
+        self.motion_track = Motion_Tracker()
+        self.audio_sample = AudioSampler(15000)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
         self.mario.update(delta_t)
+
+    def advance(self):
+        self.current_level += 1
+        self.level = Level(self.levels[self.current_level])
+        self.mario.tiles = self.level.tiles
 
 class MariosciiView():
     def __init__(self, model, width, height):
@@ -67,7 +93,7 @@ class MariosciiView():
 
     def draw(self):
         """ Redraw the full game window """
-        self.screen.fill((0,51,102))
+        self.screen.fill((0,0,0))
         self.model.mario.draw(self.screen)
         self.model.level.draw(self.screen)
         pygame.display.update()
@@ -84,14 +110,14 @@ class Marioscii():
 
     def run(self):
         last_ticks = 0.0
+        done = False
 
-        while True:
+        while not done:
             t = pygame.time.get_ticks()
-            # delta time in seconds.
             dt = (t - last_ticks) / 1000.0
             last_ticks = t
 
-            self.controller.process_events()
+            done = self.controller.process_events()
             self.model.update(dt)
             self.view.draw()
 
@@ -114,14 +140,13 @@ class Mario(pygame.sprite.Sprite):
 
         self.tiles = tiles
         self.onGround = False
+        self.jumpRatio = 10000
 
-        self.image = pygame.Surface([20,20])
-        self.image.fill(RED)
+        self.image = pygame.image.load('img/mario.png')
         self.rect = self.image.get_rect()
-        self.rect.topleft = [10, 10]
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image.convert_alpha(), self.rect)
 
     def update(self, dt):
         """ update mario due to passage of time """
@@ -133,6 +158,8 @@ class Mario(pygame.sprite.Sprite):
         self.rect.x += self.x_vel*dt
         self.collide(self.x_vel, 0)
 
+        self.x_vel = 0
+
         # y-axis updates and collisions
         self.rect.y += self.y_vel*dt
         self.onGround = False
@@ -142,8 +169,7 @@ class Mario(pygame.sprite.Sprite):
         for tile in self.tiles:
             if pygame.sprite.collide_rect(self, tile):
                 if isinstance(tile, ExitTile):
-                    pass
-                    ##TODO## Add what happens when 'exit' is reached
+                    pygame.event.post(next_level_event)
                 if x_vel > 0: self.rect.right = tile.rect.left
                 if x_vel < 0: self.rect.left = tile.rect.right
                 if y_vel > 0:
@@ -191,29 +217,32 @@ class Tile(pygame.sprite.Sprite):
         self.x_pos = x_pos
         self.y_pos = y_pos
 
-        self.image = pygame.Surface([50,50])
-        self.image.fill(BLACK)
+        self.image = pygame.image.load('img/groundTile.png')
         self.rect = self.image.get_rect()
 
         self.rect = self.rect.move(self.x_pos, self.y_pos)
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image.convert_alpha(), self.rect)
 
 class ExitTile(Tile):
     def __init__(self, x_pos, y_pos):
         Tile.__init__(self, x_pos, y_pos)
-        self.image.fill(GREEN)
+        self.image = pygame.image.load('img/exitTile.png')
+        self.rect = self.image.get_rect()
+
+        self.rect = self.rect.move(self.x_pos, self.y_pos)
 
 class PygameController():
     def __init__(self, model):
         self.model = model
 
     def process_events(self):
+        done = False
         pygame.event.pump
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                done = True
+            if event.type == NEXTLEVEL:
+                self.model.advance()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     self.model.mario.go_left()
@@ -231,37 +260,23 @@ class PygameController():
                     self.model.mario.stop()
 
 
-        # self.model.mario.collide()
-
-        # tile_hit_list = pygame.sprite.spritecollide(self.model.mario, self.model.level.tiles, False)
-        # # print "Tile hit list", tile_hit_list
-        # for tile in tile_hit_list:
-        #     # If we are moving right,
-        #     # set our right side to the left side of the item we hit
-        #     if self.model.mario.x_vel > 0:
-        #         self.model.mario.rect.right = tile.rect.left
-        #     elif self.model.mario.x_vel < 0:
-        #         # Otherwise if we are moving left, do the opposite.
-        #         self.model.mario.rect.left = tile.rect.right
-
-        # # Check and see if we hit anything
-        # tile_hit_list = pygame.sprite.spritecollide(self.model.mario, self.model.level.tiles, False)
-        # for tile in tile_hit_list:
-        #     if self.model.mario.y_vel > 0:
-        #         self.model.mario.rect.bottom = tile.rect.top
-        #     elif self.model.mario.y_vel < 0:
-        #         self.model.mario.rect.top = tile.rect.bottom
-        #     # Stop our vertical movement
-        #     self.model.mario.y_vel = 0
-
         # Audio event processing
-        if self.model.audio_sample.get_level():
+        if self.model.audio_sample.is_above_trigger():
             self.model.mario.jump()
 
-        # # # Motion event processing
-        # # x_mov = self.model.motion_track.get_movement() 
+        # audio_trigger = self.model.audio_sample.get_level()
+        # if audio_trigger:
+        #     self.model.mario.jump(audio_trigger)
 
-pygame.init()
+        # Motion event processing
+        x_mov = self.model.motion_track.get_movement() 
+        if x_mov:
+            if x_mov < 70:
+                self.model.mario.go_right()
+            if x_mov >= 70:
+                self.model.mario.go_left()
+
+        return done
 
 if __name__ == '__main__':
     marioscii = Marioscii()
