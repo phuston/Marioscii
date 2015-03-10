@@ -32,9 +32,9 @@ level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                   (0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0),
                    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                   (0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
 
@@ -48,20 +48,14 @@ class MariosciiModel():
         self.level = Level(level1)
         self.audio_sample = AudioSampler(3000)
 
-
-        # self.motion_track = Motion_Tracker()
-
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
         self.mario.update(delta_t)
-        # print marioscii.view.screen.right
 
 class MariosciiView():
     def __init__(self, model, width, height):
         """ Initialize view for Marioscii """
         pygame.init()
-        # to retrieve width and height use screen.get_size()
-        # self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.screen = pygcurse.PygcurseWindow(SCREEN_WIDTH, SCREEN_HEIGHT, fullscreen=False)
         pygame.display.set_caption('Pygcurse Marioscii')
         self.screen.autoupdate = False
@@ -74,7 +68,6 @@ class MariosciiView():
         self.screen.fill(bgcolor=BLACK)
         self.model.mario.draw(self.screen)
         self.model.level.draw(self.screen)
-        # pygame.display.update()
         self.screen.update()
 
 
@@ -100,27 +93,18 @@ class Mario(pygame.sprite.Sprite):
     def __init__(self,pos_x,pos_y):
         """ Initialize a mario at the specified position
             pos_x, pos_y """
-
-        # pygame.sprite.Sprite.__init__(self)
-
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.vel_x = 0
         self.vel_y = 0
 
-        # self.image = pygame.Surface([20,20])
-        # self.image.fill(RED)
-        # self.rect = self.image.get_rect()
-
     def draw(self, screen):
-        # screen.blit(self.image, self.rect.move(self.pos_x, self.pos_y))
         screen.putchar('@', int(self.pos_x), int(self.pos_y), RED)
 
     def update(self, delta_t):
         """ update mario due to passage of time """
         self.pos_x += self.vel_x*delta_t
         self.pos_y += self.vel_y*delta_t
-        # print self.pos_x, self.pos_y
 
     def go_left(self):
         self.vel_x = -20
@@ -140,23 +124,11 @@ class Level(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.map = map
 
-        # self.tile = pygame.Surface([50,50])
-        # self.tile.fill(GREEN)
-
     def draw(self, screen):
         for row in xrange(len(self.map)):
             for x in range(len(self.map[row])):
                 if self.map[row][x] == 1:
-                    # screen.blit(self.tile, (x*50, row*50))
                     screen.putchar('#',x,row)
-
-# class Tile(pygame.sprite.Sprite):
-#     def __init__(self, x_pos, y_pos):
-#         pygame.sprite.Sprite.__init__(self)
-#         self.image = pygame.Surface([50,50])
-#         self.image.fill(GREEN)
-
-
 
 class PygameController():
     def __init__(self, model):
@@ -182,16 +154,6 @@ class PygameController():
                     self.model.mario.stop()
                 if event.key == pygame.K_RIGHT and self.model.mario.vel_x > 0:
                     self.model.mario.stop()
-
-
-        # Audio event processing
-        # if self.model.audio_sample.is_above_trigger():
-        #     self.model.mario.go_right()
-        # else:
-        #     self.model.mario.go_left()
-
-        # Motion event processing
-        # x_mov, y_mov = self.model.motion_track.get_movement() 
 
 pygame.init()
 

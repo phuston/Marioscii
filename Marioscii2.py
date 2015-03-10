@@ -60,6 +60,7 @@ level2 = np.array(
 
 all_levels = [level1, level2]
 
+
 class MariosciiModel():
     """ Represents game state of Marioscii game """
     def __init__(self, width, height):
