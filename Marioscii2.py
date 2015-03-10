@@ -26,39 +26,61 @@ GREEN    = (   0, 255,   0)
 
 # Events
 NEXTLEVEL = pygame.USEREVENT + 1
+next_level_event = pygame.event.Event(NEXTLEVEL, message="Next Level!")
 QUIT = pygame.USEREVENT + 2
+quit_event = pygame.event.Event(QUIT, message="Quit.")
 
-level1 = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
-                   (0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
-                   (0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2),
-                   (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
+level1 = np.array(
+   [(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0),
+    (0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+    (0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+    (0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2),
+    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
-# win = pygcurse.PygcurseWindow(WINWIDTH, WINHEIGHT, fullscreen=False)
-# pygame.display.set_caption('Pygcurse Dodger')
-# win.autoupdate = False
+level2 = np.array(
+   [(2, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+    (1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
+    (1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1),
+    (1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0),
+    (1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1),
+    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
+
+all_levels = [level1, level2]
 
 class MariosciiModel():
     """ Represents game state of Marioscii game """
     def __init__(self, width, height):
+        self.levels = all_levels
+        self.current_level = 0
         self.width = width
         self.height = height
         self.tiles = pygame.sprite.Group()
-        self.level = Level(level1)
-        self.mario = Mario(20,20,self.level.tiles)
+        self.level = Level(self.levels[self.current_level])
+        self.mario = Mario(0,0,self.level.tiles)
         self.motion_track = Motion_Tracker()
         self.audio_sample = AudioSampler(15000)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
         self.mario.update(delta_t)
+
+    def advance(self):
+        self.current_level += 1
+        self.level = Level(self.levels[self.current_level])
+        self.mario.tiles = self.level.tiles
 
 class MariosciiView():
     def __init__(self, model, width, height):
@@ -71,7 +93,7 @@ class MariosciiView():
 
     def draw(self):
         """ Redraw the full game window """
-        self.screen.fill((0,51,102))
+        self.screen.fill((0,0,0))
         self.model.mario.draw(self.screen)
         self.model.level.draw(self.screen)
         pygame.display.update()
@@ -92,7 +114,6 @@ class Marioscii():
 
         while not done:
             t = pygame.time.get_ticks()
-            # delta time in seconds.
             dt = (t - last_ticks) / 1000.0
             last_ticks = t
 
@@ -148,7 +169,7 @@ class Mario(pygame.sprite.Sprite):
         for tile in self.tiles:
             if pygame.sprite.collide_rect(self, tile):
                 if isinstance(tile, ExitTile):
-                    pygame.event.post(pygame.event.Event(NEXTLEVEL))
+                    pygame.event.post(next_level_event)
                 if x_vel > 0: self.rect.right = tile.rect.left
                 if x_vel < 0: self.rect.left = tile.rect.right
                 if y_vel > 0:
@@ -197,8 +218,6 @@ class Tile(pygame.sprite.Sprite):
         self.y_pos = y_pos
 
         self.image = pygame.image.load('img/groundTile.png')
-        # self.image = pygame.Surface([50,50])
-        # self.image.fill(BLACK)
         self.rect = self.image.get_rect()
 
         self.rect = self.rect.move(self.x_pos, self.y_pos)
@@ -209,7 +228,10 @@ class Tile(pygame.sprite.Sprite):
 class ExitTile(Tile):
     def __init__(self, x_pos, y_pos):
         Tile.__init__(self, x_pos, y_pos)
-        self.image.fill(GREEN)
+        self.image = pygame.image.load('img/exitTile.png')
+        self.rect = self.image.get_rect()
+
+        self.rect = self.rect.move(self.x_pos, self.y_pos)
 
 class PygameController():
     def __init__(self, model):
@@ -219,8 +241,8 @@ class PygameController():
         done = False
         pygame.event.pump
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+            if event.type == NEXTLEVEL:
+                self.model.advance()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     self.model.mario.go_left()
