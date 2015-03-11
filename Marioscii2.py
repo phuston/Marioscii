@@ -27,8 +27,23 @@ GREEN    = (   0, 255,   0)
 # Events
 NEXTLEVEL = pygame.USEREVENT + 1
 next_level_event = pygame.event.Event(NEXTLEVEL, message="Next Level!")
-QUIT = pygame.USEREVENT + 2
+QUIT = pygame.USEREVENT + 2 
 quit_event = pygame.event.Event(QUIT, message="Quit.")
+
+
+level0 = np.array(
+   [(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
 level1 = np.array(
    [(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
@@ -58,19 +73,33 @@ level2 = np.array(
     (1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1),
     (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
 
-all_levels = [level1, level2]
+level3 = np.array(
+   [(1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1),
+    (1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1),
+    (1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1),
+    (1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    (1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1),
+    (1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1),
+    (1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 2, 1),
+    (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)])
+
+all_levels = [level0, level1, level2, level3]
 
 
 class MariosciiModel():
     """ Represents game state of Marioscii game """
     def __init__(self, width, height):
         self.levels = all_levels
-        self.current_level = 0
+        self.current_level = 3
         self.width = width
         self.height = height
         self.tiles = pygame.sprite.Group()
         self.level = Level(self.levels[self.current_level])
-        self.mario = Mario(0,0,self.level.tiles)
+        self.mario = Mario(400,300,self.level.tiles)
         self.motion_track = Motion_Tracker()
         self.audio_sample = AudioSampler(15000)
 
@@ -79,6 +108,7 @@ class MariosciiModel():
         self.mario.update(delta_t)
 
     def advance(self):
+        """Advances to next level when target tile reached"""
         self.current_level += 1
         self.level = Level(self.levels[self.current_level])
         self.mario.tiles = self.level.tiles
@@ -87,25 +117,23 @@ class MariosciiView():
     def __init__(self, model, width, height):
         """ Initialize view for Marioscii """
         pygame.init()
-        # to retrieve width and height use screen.get_size()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        # this is used for figuring out where to draw stuff
         self.model = model
 
     def draw(self):
         """ Redraw the full game window """
-        self.screen.fill((0,0,0))
-        self.model.mario.draw(self.screen)
+        self.screen.fill((0,0,0)) #Set background to black
+        self.model.mario.draw(self.screen) 
         self.model.level.draw(self.screen)
         pygame.display.update()
 
 
 class Marioscii():
-    """ The main Marioscii class """
+    """ The main Marioscii class that runs the game """
 
     def __init__(self):
-        self.model = MariosciiModel(800, 600)
-        self.view = MariosciiView(self.model, 800, 600)
+        self.model = MariosciiModel(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.view = MariosciiView(self.model, SCREEN_WIDTH, SCREEN_HEIGHT)
         self.controller = PygameController(self.model)
         self.clock = pygame.time.Clock()
 
@@ -145,6 +173,8 @@ class Mario(pygame.sprite.Sprite):
 
         self.image = pygame.image.load('img/mario.png')
         self.rect = self.image.get_rect()
+
+        self.rect = self.rect.move(pos_x,pos_y)
 
     def draw(self, screen):
         screen.blit(self.image.convert_alpha(), self.rect)
@@ -206,6 +236,12 @@ class Level(pygame.sprite.Sprite):
                 if self.map[row][x] == 2:
                     tile = ExitTile(x*50, row*50)
                     self.tiles.add(tile)
+                if self.map[row][x] == 3:
+                    tile = TitleTile(x*50, row*50)
+                    self.tiles.add(tile)
+                if self.map[row][x] == 4:
+                    tile = DirectionsTile(x*50, row*50)
+                    self.tiles.add(tile)
 
     def draw(self, screen):
         for tile in self.tiles:
@@ -231,7 +267,20 @@ class ExitTile(Tile):
         Tile.__init__(self, x_pos, y_pos)
         self.image = pygame.image.load('img/exitTile.png')
         self.rect = self.image.get_rect()
+        self.rect = self.rect.move(self.x_pos, self.y_pos)
 
+class TitleTile(Tile):
+    def __init__(self, x_pos, y_pos):
+        Tile.__init__(self, x_pos, y_pos)
+        self.image = pygame.image.load('img/title.png')
+        self.rect = self.image.get_rect()
+        self.rect = self.rect.move(self.x_pos, self.y_pos)
+
+class DirectionsTile(Tile):
+    def __init__(self, x_pos, y_pos):
+        Tile.__init__(self, x_pos, y_pos)
+        self.image = pygame.image.load('img/directions.png')
+        self.rect = self.image.get_rect()
         self.rect = self.rect.move(self.x_pos, self.y_pos)
 
 class PygameController():
@@ -244,6 +293,8 @@ class PygameController():
         for event in pygame.event.get():
             if event.type == NEXTLEVEL:
                 self.model.advance()
+            if event.type == QUIT:
+                done = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     self.model.mario.go_left()
@@ -251,6 +302,8 @@ class PygameController():
                     self.model.mario.go_right()
                 if event.key == pygame.K_SPACE:
                     self.model.mario.jump()
+                if event.key == pygame.K_q:
+                    pygame.event.post(quit_event)
                     
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and self.model.mario.x_vel < 0:
@@ -272,9 +325,9 @@ class PygameController():
         # Motion event processing
         x_mov = self.model.motion_track.get_movement() 
         if x_mov:
-            if x_mov < 70:
+            if x_mov < 60:
                 self.model.mario.go_right()
-            if x_mov >= 70:
+            if x_mov >= 60:
                 self.model.mario.go_left()
 
         return done
