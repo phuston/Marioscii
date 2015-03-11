@@ -96,14 +96,14 @@ class MariosciiModel():
     def __init__(self, width, height):
         # Define model components - levels, character, motion tracker, audio sampler
         self.levels = all_levels
-        self.current_level = 0
+        self.current_level = 3
         self.width = width
         self.height = height
         self.tiles = pygame.sprite.Group()
         self.level = Level(self.levels[self.current_level])
         self.mario = Mario(400,300,self.level.tiles)
         self.motion_track = Motion_Tracker()
-        self.audio_sample = AudioSampler(15000)
+        self.audio_sample = AudioSampler(10000)
 
     def update(self, delta_t):
         """ Updates the model and its constituent parts """
@@ -173,7 +173,6 @@ class Mario(pygame.sprite.Sprite):
 
         self.tiles = tiles
         self.onGround = False
-        self.jumpRatio = 10000
 
         self.image = pygame.image.load('img/mario.png')
         self.rect = self.image.get_rect()
@@ -241,6 +240,7 @@ class Mario(pygame.sprite.Sprite):
 
     def stop(self):
         self.x_vel = 0
+
 
 class Level(pygame.sprite.Sprite):
     """ Represents a level """
