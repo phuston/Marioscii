@@ -96,7 +96,7 @@ class MariosciiModel():
     def __init__(self, width, height):
         # Define model components - levels, character, motion tracker, audio sampler
         self.levels = all_levels
-        self.current_level = 3
+        self.current_level = 0
         self.width = width
         self.height = height
         self.tiles = pygame.sprite.Group()
@@ -169,7 +169,7 @@ class Mario(pygame.sprite.Sprite):
         self.x_vel = 0
         self.y_vel = 0
         self.acc_x = 0
-        self.acc_y = 450
+        self.acc_y = 600
 
         self.tiles = tiles
         self.onGround = False
@@ -229,14 +229,14 @@ class Mario(pygame.sprite.Sprite):
                     self.rect.top = tile.rect.bottom
 
     def go_left(self):
-        self.x_vel = -150
+        self.x_vel = -200
 
     def go_right(self): 
-        self.x_vel = 150
+        self.x_vel = 200
 
     def jump(self):
         if self.onGround:
-            self.y_vel = -300
+            self.y_vel = -350
 
     def stop(self):
         self.x_vel = 0
@@ -279,6 +279,7 @@ class Tile(pygame.sprite.Sprite):
         self.x_pos = x_pos
         self.y_pos = y_pos
 
+        "audio/filename.wav"
         self.image = pygame.image.load('img/groundTile.png')
         self.rect = self.image.get_rect()
 
